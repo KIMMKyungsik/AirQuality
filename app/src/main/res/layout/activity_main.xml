@@ -39,7 +39,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:letterSpacing="-0.05"
-        android:text="역삼동"
+        android:text="중화동"
         android:textColor="#000000"
         android:textSize="32sp"
         android:textStyle="bold"
@@ -141,7 +141,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tv_check_time" />
 
-    
+
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
