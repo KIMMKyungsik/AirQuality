@@ -6,6 +6,8 @@ import android.app.Activity
 import android.app.AlertDialog
 import android.content.DialogInterface
 import android.content.pm.PackageManager
+import android.location.Address
+import android.location.Geocoder
 import android.location.LocationManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -16,12 +18,17 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.application.airquality.databinding.ActivityMainBinding
+import java.io.IOException
+import java.lang.IllegalArgumentException
+import java.util.*
 
 
 class MainActivity : AppCompatActivity() {
     lateinit var binding: ActivityMainBinding
+    lateinit var locationProvider: LocationProvider
 
     private val PERMISSION_REQUEST_CODE = 100
+
 
     val REQUIRED_PERMISSIONS = arrayOf(
         Manifest.permission.ACCESS_FINE_LOCATION,
@@ -36,6 +43,28 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         checkAllPermissions()
+        updateUI()
+    }
+
+    private fun updateUI() {
+        locationProvider = LocationProvider(this)
+
+        val latitude: Double = locationProvider.getLocationLatitude()
+        val longitude: Double = locationProvider.getLocationLongitude()
+
+        if (latitude != 0.0 || longitude != 0.0) {
+
+            val address = getCurrentAddress(latitude, longitude)
+            address?.let {
+                binding.tvLocationTitle.text = "${it.thoroughfare}"
+                binding.tvLocationSubtitle.text = "${it.countryName} ${it.adminArea}"
+            }
+
+        } else {
+
+            Toast.makeText(this, "위도, 경도 정보를 가져올 수 없었습니다. 새로고침을 눌러주세요.", Toast.LENGTH_LONG)
+                .show()
+        }
     }
 
     private fun checkAllPermissions() {
@@ -96,6 +125,8 @@ class MainActivity : AppCompatActivity() {
 
             if (checkResult) {
 
+                updateUI()
+
             } else {
                 Toast.makeText(
                     this@MainActivity, "퍼미션이 거부되었습니다. 앱을 다시 실행하여 퍼미션을 허용해 주세요.", Toast.LENGTH_LONG
@@ -122,29 +153,57 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        val builder :AlertDialog.Builder =AlertDialog.Builder(
-            this@MainActivity)
+        val builder: AlertDialog.Builder = AlertDialog.Builder(
+            this@MainActivity
+        )
         builder.setTitle("위치 서비스 활성화")
         builder.setMessage("위치 서비스가 꺼져 있습니다. 설정해야 앱을 사용할 수 있습니다.")
         builder.setCancelable(true)
-        builder.setPositiveButton("설정",DialogInterface.OnClickListener{
-            dialog, id ->
+        builder.setPositiveButton("설정", DialogInterface.OnClickListener { dialog, id ->
             val callGPSSettingIntent = Intent(
-                Settings.ACTION_LOCATION_SOURCE_SETTINGS)
+                Settings.ACTION_LOCATION_SOURCE_SETTINGS
+            )
             getGPSPermissionLauncher.launch(callGPSSettingIntent)
 
         })
 
         builder.setNegativeButton("취소",
-        DialogInterface.OnClickListener{
-            dialog,id ->
-            dialog.cancel()
-            Toast.makeText(this@MainActivity,"기기에서 위치서비스(GPS) 설정 후 사용해주세요",
-            Toast.LENGTH_SHORT).show()
-            finish()
-        })
+            DialogInterface.OnClickListener { dialog, id ->
+                dialog.cancel()
+                Toast.makeText(
+                    this@MainActivity, "기기에서 위치서비스(GPS) 설정 후 사용해주세요",
+                    Toast.LENGTH_SHORT
+                ).show()
+                finish()
+            })
         builder.create().show()
 
+
+    }
+
+    fun getCurrentAddress(latitude: Double, longitude: Double): Address? {
+        val geocoder = Geocoder(this, Locale.getDefault())
+        val addresses: List<Address>?
+
+        addresses = try {
+            geocoder.getFromLocation(latitude, longitude, 7)
+        } catch (ioException: IOException) {
+
+            Toast.makeText(this, "지오코더 서비스 사용불가합니다.", Toast.LENGTH_LONG).show()
+            return null
+        } catch (illegalArgumentException: IllegalArgumentException) {
+            Toast.makeText(this, "잘못된 위도, 경도 입니다.", Toast.LENGTH_LONG).show()
+            return null
+        }
+
+        if (addresses == null || addresses.size == 0) {
+
+            Toast.makeText(this, "주소가 발견되지 않았습니다.", Toast.LENGTH_LONG).show()
+            return null
+
+        }
+        val address: Address = addresses[0]
+        return address
 
     }
 }
