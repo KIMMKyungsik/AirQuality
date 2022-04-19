@@ -12,5 +12,8 @@ dependencyResolutionManagement {
         mavenCentral()
     }
 }
+
+
+
 rootProject.name = "AirQuality"
 include ':app'
