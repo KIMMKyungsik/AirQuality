@@ -40,34 +40,35 @@ import java.util.*
 
 
 class MainActivity : AppCompatActivity() {
-    override fun onResume() {
-        super.onResume()
-        setInterstitialAds()
-    }
-
-
-
     lateinit var binding: ActivityMainBinding
-    lateinit var locationProvider: LocationProvider
-    var latitude: Double = 0.0
-    var longitude: Double = 0.0
 
+    // 런타임 권한 요청시 필요한 요청 코드
     private val PERMISSION_REQUEST_CODE = 100
 
 
+    // 요청할 권한 리스트
     val REQUIRED_PERMISSIONS = arrayOf(
         Manifest.permission.ACCESS_FINE_LOCATION,
         Manifest.permission.ACCESS_COARSE_LOCATION
     )
 
+
+    // 위치 서비스 요청시 필요
     lateinit var getGPSPermissionLauncher: ActivityResultLauncher<Intent>
 
+    // 위도 경도를 가져올 시 필요
+    lateinit var locationProvider: LocationProvider
+
+
+    //위도와 경도를 저장
+    var latitude: Double = 0.0
+    var longitude: Double = 0.0
 
     val startMapActivityResult =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult(),
             object : ActivityResultCallback<ActivityResult> {
                 override fun onActivityResult(result: ActivityResult?) {
-                    if (result?.resultCode ?: 0 == Activity.RESULT_OK) {
+                    if (result?.resultCode ?: Activity.RESULT_CANCELED == Activity.RESULT_OK) {
                         latitude = result?.data?.getDoubleExtra("latitude", 0.0) ?: 0.0
                         longitude = result?.data?.getDoubleExtra("longitude", 0.0) ?: 0.0
                         updateUI()
@@ -76,7 +77,7 @@ class MainActivity : AppCompatActivity() {
                 }
 
             })
-
+    // 전면 광고
     var mInterstitialAd: InterstitialAd? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -87,10 +88,66 @@ class MainActivity : AppCompatActivity() {
         checkAllPermissions()
         updateUI()
         setRefreshButton()
-
         setFab()
         setBannerAds()
     }
+
+    private fun setInterstitialAds() {
+        val adRequest = AdRequest.Builder().build()
+
+        InterstitialAd.load(
+            this,
+            "ca-app-pub-8208941848665388/7576679447",
+            adRequest,
+            object : InterstitialAdLoadCallback() {
+                override fun onAdFailedToLoad(adError: LoadAdError) {
+                    Log.d("ads log", "전면 광고가 로드 실패했습니다. ${adError.responseInfo}")
+                    mInterstitialAd = null
+                }
+
+                override fun onAdLoaded(intersititialAd: InterstitialAd) {
+                    Log.d("ads log", "전면 광고가 로드되었습니다.")
+                    mInterstitialAd = intersititialAd
+                }
+            })
+    }
+
+    private fun setBannerAds() {
+        MobileAds.initialize(this)
+        val adRequest = AdRequest.Builder().build()
+        binding.adView.loadAd(adRequest)
+
+        binding.adView.adListener = object : AdListener() {
+            override fun onAdClicked() {
+                Log.d("ads log", "배너 광고를 클릭했습니다.")
+            }
+
+            override fun onAdClosed() {
+                Log.d("ads log", "배너 광고를 닫았습니다.")
+            }
+
+            override fun onAdFailedToLoad(adError: LoadAdError) {
+                Log.d("ads log", "배너 광고가 로드 실패했습니다. ${adError.responseInfo}")
+            }
+
+
+            override fun onAdLoaded() {
+                Log.d("ads log", "배너 광고가 로드되었습니다.")
+            }
+
+            override fun onAdOpened() {
+                Log.d("ads log", "배너 광고를 열었습니다.")
+            }
+        }
+
+    }
+
+
+    override fun onResume() {
+        super.onResume()
+        setInterstitialAds()
+    }
+
 
     private fun setFab() {
         binding.fab.setOnClickListener {
@@ -114,7 +171,7 @@ class MainActivity : AppCompatActivity() {
                         mInterstitialAd = null
                     }
                 }
-                mInterstitialAd!!.show(this@MainActivity)
+                mInterstitialAd!!.show(this)
 
             } else {
                 Log.d("InterstitialAd", "전면 광고가 로딩되지 않았습니다.")
@@ -370,48 +427,5 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    private fun setBannerAds() {
-        MobileAds.initialize(this)
-        val adRequest = AdRequest.Builder().build()
-        binding.adView.loadAd(adRequest)
 
-        binding.adView.adListener = object : AdListener() {
-            override fun onAdClicked() {
-                Log.d("ads log", "배너 광고를 클릭했습니다.")
-            }
-
-            override fun onAdClosed() {
-                Log.d("ads log", "배너 광고를 닫았습니다.")
-            }
-
-            override fun onAdFailedToLoad(adError: LoadAdError) {
-                Log.d("ads log", "배너 광고가 로드 실패했습니다. ${adError.responseInfo}")
-            }
-
-
-            override fun onAdLoaded() {
-                Log.d("ads log", "배너 광고가 로드되었습니다.")
-            }
-
-            override fun onAdOpened() {
-                Log.d("ads log", "배너 광고를 열었습니다.")
-            }
-        }
-
-    }
-    private fun setInterstitialAds() {
-       val adRequest = AdRequest.Builder().build()
-
-        InterstitialAd.load(this,"ca-app-pub-3940256099942544/1033173712",adRequest,object : InterstitialAdLoadCallback(){
-            override fun onAdFailedToLoad(adError: LoadAdError) {
-                Log.d("ads log","전면 광고가 로드 실패했습니다. ${adError.responseInfo}")
-                mInterstitialAd = null
-            }
-
-            override fun onAdLoaded(intersititialAd: InterstitialAd) {
-                Log.d("ads log","전면 광고가 로드되었습니다.")
-                mInterstitialAd = intersititialAd
-            }
-        })
-    }
 }

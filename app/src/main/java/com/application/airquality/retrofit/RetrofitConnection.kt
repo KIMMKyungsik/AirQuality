@@ -5,6 +5,8 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 class RetrofitConnection {
 
+
+    //객체를 하나만 생성하는 싱글턴 패턴
     companion object {
 
         private const val BASE_URL = "https://api.airvisual.com/v2/"

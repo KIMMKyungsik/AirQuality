@@ -42,7 +42,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
             }
         }
     }
-
+    // 지도가 실행되었을 때 실행되는 함수
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
         mMap?.let {
@@ -61,14 +61,14 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
             setMarker()
         }
     }
-
+    //마커를 설정하는 함수
     private fun setMarker() {
         mMap?.let {
-            it.clear()
+            it.clear() // 지도에 있는 마커를 먼저 삭제
             val markerOptions = MarkerOptions()
-            markerOptions.position(it.cameraPosition.target)
-            markerOptions.title("마커 위치")
-            val marker = it.addMarker(markerOptions)
+            markerOptions.position(it.cameraPosition.target) // 마커의 위치 설정
+            markerOptions.title("마커 위치") // 마커의 이름 설정
+            val marker = it.addMarker(markerOptions) // 지도에 마커를 추가하고, 마커 객체를 리턴한다
 
             it.setOnCameraMoveListener {
                 marker?.let { marker ->
