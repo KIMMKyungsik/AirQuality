@@ -39,6 +39,8 @@
             android:name="com.google.android.gms.ads.APPLICATION_ID"
             android:value="ca-app-pub-8208941848665388~7959822828" />
 
+
+
     </application>
 
 </manifest>

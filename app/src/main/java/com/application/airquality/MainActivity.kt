@@ -30,7 +30,6 @@ import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import retrofit2.create
 import java.io.IOException
 import java.lang.IllegalArgumentException
 import java.time.ZoneId
@@ -77,6 +76,8 @@ class MainActivity : AppCompatActivity() {
                 }
 
             })
+
+
     // 전면 광고
     var mInterstitialAd: InterstitialAd? = null
 
@@ -92,12 +93,21 @@ class MainActivity : AppCompatActivity() {
         setBannerAds()
     }
 
+
+    override fun onResume() {
+        super.onResume()
+        setInterstitialAds()
+    }
+
+
+
     private fun setInterstitialAds() {
+
         val adRequest = AdRequest.Builder().build()
 
         InterstitialAd.load(
             this,
-            "ca-app-pub-8208941848665388/7576679447",
+            "ca-app-pub-3940256099942544/1033173712",
             adRequest,
             object : InterstitialAdLoadCallback() {
                 override fun onAdFailedToLoad(adError: LoadAdError) {
@@ -105,9 +115,9 @@ class MainActivity : AppCompatActivity() {
                     mInterstitialAd = null
                 }
 
-                override fun onAdLoaded(intersititialAd: InterstitialAd) {
+                override fun onAdLoaded(interstitialAd: InterstitialAd) {
                     Log.d("ads log", "전면 광고가 로드되었습니다.")
-                    mInterstitialAd = intersititialAd
+                    mInterstitialAd = interstitialAd
                 }
             })
     }
@@ -143,10 +153,7 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-    override fun onResume() {
-        super.onResume()
-        setInterstitialAds()
-    }
+
 
 
     private fun setFab() {
