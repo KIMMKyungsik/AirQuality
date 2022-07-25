@@ -50,13 +50,14 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
             it.setMaxZoomPreference(20.0f)
             it.setMinZoomPreference(12.0f)
             it.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation,16f))
-
         }
+
+
         setMarker()
         binding.fabCurrentLocation.setOnClickListener {
             val locationProvider = LocationProvider(this@MapActivity)
             val latitude = locationProvider.getLocationLatitude()
-            val longitude = locationProvider.getLocationLatitude()
+            val longitude = locationProvider.getLocationLongitude()
             mMap?.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(latitude,longitude),16f))
             setMarker()
         }
